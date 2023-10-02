@@ -29,12 +29,10 @@ export class App extends Component {
 
     try {
       const { images, totalHits } = await fetchImages(query, page);
-      console.log(images);
-      console.log(totalHits);
       const totalPages = Math.ceil(totalHits / 12);
 
       this.setState((prevState) => ({
-        images: images ? [...prevState.images, ...images] : prevState.images,
+        images: page === 1 ? images : [...prevState.images, ...images],
         page: prevState.page + 1,
         isLoading: false,
         totalHits,
@@ -45,6 +43,12 @@ export class App extends Component {
       this.setState({ isLoading: false });
     }
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.query !== prevState.query) {
+      this.fetchImages();
+    }
+  }
 
   handleImageClick = (largeImageURL) => {
     this.setState({ showModal: true, largeImageURL });
@@ -61,9 +65,9 @@ export class App extends Component {
       <div>
         <Searchbar onSubmit={this.handleSearchSubmit} />
         <ImageGallery>
-          {images.map(image => (
+          {images.map((image, index) => (
             <ImageGalleryItem
-              key={image.id}
+              key={index}
               webformatURL={image.webformatURL}
               largeImageURL={image.largeImageURL}
               onClick={() => this.handleImageClick(image.largeImageURL)}
