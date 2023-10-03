@@ -20,7 +20,7 @@ export class App extends Component {
   };
 
   handleSearchSubmit = async (query) => {
-    this.setState({ query, page: 1, images: [], totalHits: 0 }, this.fetchImages);
+    this.setState({ query, page: 1, images: [], totalHits: 0 });
   };
 
   fetchImages = async () => {
@@ -33,7 +33,6 @@ export class App extends Component {
 
       this.setState((prevState) => ({
         images: page === 1 ? images : [...prevState.images, ...images],
-        page: prevState.page + 1,
         isLoading: false,
         totalHits,
         loadMore: prevState.page < totalPages,
@@ -45,10 +44,10 @@ export class App extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.query !== prevState.query) {
-      this.fetchImages();
-    }
+  if (this.state.query !== prevState.query || this.state.page !== prevState.page) {
+    this.fetchImages();
   }
+}
 
   handleImageClick = (largeImageURL) => {
     this.setState({ showModal: true, largeImageURL });
@@ -56,6 +55,12 @@ export class App extends Component {
 
   handleCloseModal = () => {
     this.setState({ showModal: false, largeImageURL: '' });
+  };
+
+  pageUpdate = () => {
+    this.setState((prevState) => ({
+      page: prevState.page + 1,
+    }));
   };
 
   render() {
@@ -76,7 +81,7 @@ export class App extends Component {
         </ImageGallery>
         {isLoading && <Oval />}
         {images.length > 0 && !isLoading && loadMore && (
-          <Button onClick={this.fetchImages} />
+          <Button onClick={this.pageUpdate} />
         )}
         {showModal && (
           <Modal largeImageURL={largeImageURL} onClose={this.handleCloseModal} />
